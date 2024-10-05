@@ -84,4 +84,101 @@ public class FraudDetectionSystemTest {
         Assertions.assertFalse(result.verificationRequired);
         Assertions.assertEquals(0, result.riskScore);
     }
+
+    @Test
+    public void testMultipleRulesTriggeredAll() {
+        // várias regras acionadas
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 5), "BR");
+            previousTransactions.add(transaction);
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10001, currentTime, "USA");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("USA"));
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertTrue(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(100, result.riskScore);
+    }
+
+    @Test
+    public void testMultipleRules12Triggered() {
+        // regras 1 e 2 acionadas
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 5), "BR");
+            previousTransactions.add(transaction);
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10001, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, new ArrayList<>());
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertTrue(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(80, result.riskScore);
+    }
+
+    @Test
+    public void testMultipleRules13Triggered() {
+        // regras 1 e 3 acionadas
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(10001, currentTime.minusMinutes(10), "BR");
+        FraudDetectionSystem.Transaction transaction2 = new FraudDetectionSystem.Transaction(100, currentTime, "USA");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction1, List.of(transaction2), new ArrayList<>());
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertFalse(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(70, result.riskScore);
+    }
+
+    @Test
+    public void testMultipleRules14Triggered() {
+        // regras 1 e 4 acionadas
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10001, currentTime, "HighRiskLocation");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, new ArrayList<>(), List.of("HighRiskLocation"));
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertTrue(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(100, result.riskScore); // max risk score = 100
+    }
+
+    @Test
+    public void testMultipleRules23Triggered() {
+        // regras 2 e 3 acionadas
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 2), "BR");
+            previousTransactions.add(transaction);
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime, "USA");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, new ArrayList<>());
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertTrue(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(50, result.riskScore);
+    }
+
+    @Test
+    public void testMultipleRules24Triggered() {
+        // regras 2 e 4 acionadas
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 2), "BR");
+            previousTransactions.add(transaction);
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime, "HighRiskLocation");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertTrue(result.isFraudulent);
+        Assertions.assertTrue(result.isBlocked);
+        Assertions.assertTrue(result.verificationRequired);
+        Assertions.assertEquals(100, result.riskScore);
+    }
 }

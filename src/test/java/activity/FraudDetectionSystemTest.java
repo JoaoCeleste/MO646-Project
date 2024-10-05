@@ -1,18 +1,12 @@
 package activity;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.Assert.*;
-
 
 public class FraudDetectionSystemTest {
     private FraudDetectionSystem fraudDetectionSystem;

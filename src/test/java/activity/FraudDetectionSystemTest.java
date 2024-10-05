@@ -35,7 +35,7 @@ public class FraudDetectionSystemTest {
         // mais de 10 transações na última hora (Regra 2)
         ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
         for (int i = 0; i < 11; i++) {
-            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 5), "BR");
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 2), "BR");
             previousTransactions.add(transaction);
         }
 

@@ -31,7 +31,7 @@ public class SmartEnergyManagementSystemTest {
     }
 
     @Test
-    public void testEnergySavingModeBasedOnPriceThreshold() {
+    public void testEnergySavingModeBasedOnPriceThresholdLowTemperature() {
         // preço da energia excede o limite, ativando o modo de economia de energia
         SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
                 0.25, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
@@ -44,9 +44,22 @@ public class SmartEnergyManagementSystemTest {
     }
 
     @Test
+    public void testEnergySavingModeBasedOnPriceThresholdHighTemperature() {
+        // preço da energia excede o limite, ativando o modo de economia de energia
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.25, 0.20, devicePriorities, currentTime, 25.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.energySavingMode);
+        Assertions.assertTrue(result.deviceStatus.get("Cooling"));
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertFalse(result.deviceStatus.get("Lights"));
+        Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+    }
+
+    @Test
     public void testNightModeActivation() {
         // modo noturno ativo entre 23h e 6h
-        currentTime = LocalDateTime.of(2024, 10, 1, 23, 30);  // 11:30 PM
+        currentTime = LocalDateTime.of(2024, 10, 1, 23, 0);  // 11:00 PM
         SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
                 0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
 
@@ -54,6 +67,45 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Refrigerator"));
         Assertions.assertFalse(result.deviceStatus.get("Lights"));
         Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+    }
+
+    @Test
+    public void testNightModeActivationAfterEleven() {
+        // modo noturno ativo entre 23h e 6h
+        currentTime = LocalDateTime.of(2024, 10, 1, 0, 0);  // 00:00 PM
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertTrue(result.deviceStatus.get("Refrigerator"));
+        Assertions.assertFalse(result.deviceStatus.get("Lights"));
+        Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+    }
+
+    @Test
+    public void testNightModeDeactivationSix() {
+        // modo noturno inativo entre 23h e 6h
+        currentTime = LocalDateTime.of(2024, 10, 1, 6, 0);  // 6:00 AM
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertTrue(result.deviceStatus.get("Refrigerator"));
+        Assertions.assertTrue(result.deviceStatus.get("Lights"));
+        Assertions.assertTrue(result.deviceStatus.get("Appliances"));
+    }
+
+    @Test
+    public void testNightModeDeactivationBeforeEleven() {
+        // modo noturno inativo entre 23h e 6h
+        currentTime = LocalDateTime.of(2024, 10, 1, 22, 59);  // 22:59 AM
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertTrue(result.deviceStatus.get("Refrigerator"));
+        Assertions.assertTrue(result.deviceStatus.get("Lights"));
+        Assertions.assertTrue(result.deviceStatus.get("Appliances"));
     }
 
 //    @Test
@@ -97,6 +149,32 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Security"));
         Assertions.assertFalse(result.deviceStatus.get("Lights"));
         Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
+    }
+
+    @Test
+    public void testEnergyLimitReached() {
+        // limite de uso de energia atingido, dispositivos de baixa prioridade desligados
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 30.0, List.of());
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertFalse(result.deviceStatus.get("Lights"));
+        Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
+    }
+
+    @Test
+    public void testEnergyLimitNotExceeded() {
+        // limite de uso de energia não excedido, todos os dispositivos ligados
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 29.0, List.of());
+        Assertions.assertTrue(result.deviceStatus.get("Security"));
+        Assertions.assertTrue(result.deviceStatus.get("Lights"));
+        Assertions.assertTrue(result.deviceStatus.get("Appliances"));
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
     }
 
     @Test
@@ -120,6 +198,18 @@ public class SmartEnergyManagementSystemTest {
                 0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 50.0, 25.0, List.of(schedule));
 
         Assertions.assertTrue(result.deviceStatus.get("Oven"));
+        Assertions.assertFalse(result.deviceStatus.get("Lights"));
+        Assertions.assertFalse(result.deviceStatus.get("Appliances"));
+    }
+
+    @Test
+    public void testScheduledDeviceOutsideTimeRange() {
+        // um dispositivo programado para ser ligado mas current time != scheduled time
+        SmartEnergyManagementSystem.DeviceSchedule schedule = new SmartEnergyManagementSystem.DeviceSchedule("Oven", currentTime);
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.25, 0.20, devicePriorities, currentTime.minusMinutes(1), 22.0, desiredTemperatureRange, 50.0, 25.0, List.of(schedule));
+
+        Assertions.assertFalse(result.deviceStatus.get("Oven"));
         Assertions.assertFalse(result.deviceStatus.get("Lights"));
         Assertions.assertFalse(result.deviceStatus.get("Appliances"));
     }

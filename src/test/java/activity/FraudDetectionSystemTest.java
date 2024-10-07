@@ -49,6 +49,24 @@ public class FraudDetectionSystemTest {
     }
 
     @Test
+    public void testExcessiveTransactionsNotInLastHour() {
+        // mais de 10 transações, mas não na última hora
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(i * 30), "BR");
+            previousTransactions.add(transaction);
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(100, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, new ArrayList<>());
+
+        Assertions.assertFalse(result.isFraudulent);
+        Assertions.assertFalse(result.isBlocked);
+        Assertions.assertFalse(result.verificationRequired);
+        Assertions.assertEquals(0, result.riskScore);
+    }
+
+    @Test
     public void testLocationChangeWithinShortTimeFrame() {
         // mudança de localização em um curto espaço de tempo (Regra 3)
         FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(100, currentTime.minusMinutes(10), "BR");

@@ -108,27 +108,27 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Appliances"));
     }
 
-//    @Test
-//    public void testTemperatureRegulationHeatingActive() {
-//        // temperatura abaixo do intervalo desejado, aquecimento ativo - erro de teste: cooling ativo
-//        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
-//                0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
-//
-//        Assertions.assertTrue(result.temperatureRegulationActive);
-//        Assertions.assertTrue(result.deviceStatus.get("Heating"));
-//        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
-//    }
-//
-//    @Test
-//    public void testTemperatureRegulationCoolingActive() {
-//        // emperatura acima do intervalo desejado, resfriamento ativo - erro de teste: heating ativo
-//        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
-//                0.15, 0.20, devicePriorities, currentTime, 25.0, desiredTemperatureRange, 50.0, 25.0, List.of());
-//
-//        Assertions.assertTrue(result.temperatureRegulationActive);
-//        Assertions.assertFalse(result.deviceStatus.get("Heating"));
-//        Assertions.assertTrue(result.deviceStatus.get("Cooling"));
-//    }
+    @Test
+    public void testTemperatureRegulationHeatingActive() {
+        // temperatura abaixo do intervalo desejado, aquecimento ativo - erro de teste: cooling ativo
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 19.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.temperatureRegulationActive);
+        Assertions.assertTrue(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
+    }
+
+    @Test
+    public void testTemperatureRegulationCoolingActive() {
+        // emperatura acima do intervalo desejado, resfriamento ativo - erro de teste: heating ativo
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 25.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+
+        Assertions.assertTrue(result.temperatureRegulationActive);
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertTrue(result.deviceStatus.get("Cooling"));
+    }
 
     @Test
     public void testTemperatureRegulationInactive() {
@@ -144,9 +144,18 @@ public class SmartEnergyManagementSystemTest {
     @Test
     public void testEnergyLimitExceeded() {
         // limite de uso de energia excedido, dispositivos de baixa prioridade desligados
+        energyManagementSystem = new SmartEnergyManagementSystem();
+        devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 2);
+        devicePriorities.put("Cooling", 2);
+        devicePriorities.put("Security", 2);
+        devicePriorities.put("Refrigerator", 2);
+        devicePriorities.put("Lights", 2);
+        devicePriorities.put("Appliances", 3);
+        devicePriorities.put("Oven", 3);
         SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
-                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 31.0, List.of());
-        Assertions.assertTrue(result.deviceStatus.get("Security"));
+                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 40.0, List.of());
+        Assertions.assertFalse(result.deviceStatus.get("Security"));
         Assertions.assertFalse(result.deviceStatus.get("Lights"));
         Assertions.assertFalse(result.deviceStatus.get("Appliances"));
         Assertions.assertFalse(result.deviceStatus.get("Heating"));
@@ -157,7 +166,7 @@ public class SmartEnergyManagementSystemTest {
     public void testEnergyLimitReached() {
         // limite de uso de energia atingido, dispositivos de baixa prioridade desligados
         SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
-                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 30.0, List.of());
+                0.15, 0.20, devicePriorities, currentTime, 22.0, desiredTemperatureRange, 30.0, 32.0, List.of());
         Assertions.assertTrue(result.deviceStatus.get("Security"));
         Assertions.assertFalse(result.deviceStatus.get("Lights"));
         Assertions.assertFalse(result.deviceStatus.get("Appliances"));

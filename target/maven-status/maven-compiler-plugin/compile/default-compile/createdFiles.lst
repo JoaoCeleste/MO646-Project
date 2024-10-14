@@ -1,0 +1,8 @@
+activity/FlightBookingSystem$BookingResult.class
+activity/FraudDetectionSystem$FraudCheckResult.class
+activity/SmartEnergyManagementSystem$EnergyManagementResult.class
+activity/SmartEnergyManagementSystem.class
+activity/SmartEnergyManagementSystem$DeviceSchedule.class
+activity/FraudDetectionSystem.class
+activity/FlightBookingSystem.class
+activity/FraudDetectionSystem$Transaction.class

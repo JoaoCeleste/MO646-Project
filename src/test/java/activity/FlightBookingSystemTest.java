@@ -115,4 +115,43 @@ public class FlightBookingSystemTest {
         Assertions.assertEquals(0, result.refundAmount);
         Assertions.assertFalse(result.pointsUsed);
     }
+
+    @Test
+    public void testSeatAvailable(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(5, bookingTime, 5, 200.0, 50, false, departureTime, 0);
+        Assertions.assertTrue(result.confirmation);
+    }
+
+    @Test
+    public void testSeatExceeded(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(6, bookingTime, 5, 200.0, 50, false, departureTime, 0);
+        Assertions.assertFalse(result.confirmation);
+
+    }
+
+    @Test
+    public void testDiscountNotApplied(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(4, bookingTime, 5, 200.0, 50, false, departureTime, 0);
+        Assertions.assertEquals(320.00, result.totalPrice);
+    }
+
+    @Test
+    public void testDiscountApplied(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(5, bookingTime, 5, 200.0, 50, false, departureTime, 0);
+        Assertions.assertEquals(380.00, result.totalPrice);
+    }
+
+    @Test
+    public void testCancelationValid(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(4, bookingTime, 5, 200.0, 50, true, bookingTime.plusHours(48), 0);
+        Assertions.assertEquals(320.00, result.refundAmount);
+
+    }
+
+    @Test 
+    public void testCancelationInvalid(){
+        FlightBookingSystem.BookingResult result = flightBookingSystem.bookFlight(4, bookingTime, 5, 200.0, 50, true, bookingTime.plusHours(24), 0);
+        Assertions.assertEquals(160.00, result.refundAmount);
+
+    }
 }

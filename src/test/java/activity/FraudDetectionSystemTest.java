@@ -199,4 +199,199 @@ public class FraudDetectionSystemTest {
         Assertions.assertTrue(result.verificationRequired);
         Assertions.assertEquals(100, result.riskScore);
     }
+
+
+    @Test
+    public void testTransactionLimit(){
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(10000, currentTime.minusMinutes(10), "BR");
+         FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction1, previousTransactions, List.of("HighRiskLocation"));
+        Assertions.assertFalse(result.isFraudulent);
+    }
+
+     @Test
+    public void testTransactionAboveLimit(){
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(10001, currentTime.minusMinutes(10), "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction1, previousTransactions, List.of("HighRiskLocation"));
+        Assertions.assertTrue(result.isFraudulent);
+    }
+
+    @Test
+    public void testTransactionCountLimit(){
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10000, currentTime.minusMinutes(10), "BR");
+            previousTransactions.add(transaction);
+        }
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10000, currentTime.minusMinutes(10), "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+
+  @Test
+    public void testTransactionCountAboveLimit(){
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10000, currentTime.minusMinutes(10), "BR");
+            previousTransactions.add(transaction);
+        }
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(10000, currentTime.minusMinutes(10), "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+        Assertions.assertTrue(result.isBlocked);
+    }
+
+    @Test
+    public void testLocationChangeWithin30Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(29), "US");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertTrue(result.isFraudulent);
+    }
+
+    @Test
+    public void testLocationSameWithin30Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(29), "BR");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isFraudulent);
+    }
+
+    @Test
+    public void testLocationChangeOutside30Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(31), "US");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isFraudulent);
+    }
+
+    @Test
+    public void testLocationSameOutside30Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(31), "BR");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isFraudulent);
+    }
+
+    @Test
+public void testLocationChangeExactly30Minutes() {
+    ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+    FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(30), "US");
+    previousTransactions.add(transaction1);
+
+    FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+    FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+    Assertions.assertFalse(result.isFraudulent);
+}
+
+    @Test
+public void testTransactionExactly60Minutes() {
+    ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+    FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(60), "BR");
+    previousTransactions.add(transaction1);
+
+    FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+    FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+    Assertions.assertFalse(result.isBlocked);
+}
+
+    @Test
+    public void testTransactionWithin60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(59), "BR");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+    @Test
+    public void testTransactionOutside60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        FraudDetectionSystem.Transaction transaction1 = new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(61), "BR");
+        previousTransactions.add(transaction1);
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+    @Test
+    public void testMultipleTransactionsExactly60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            previousTransactions.add(new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(60), "BR"));
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+    @Test
+    public void testMultipleTransactionsWithin60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            previousTransactions.add(new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(59), "BR"));
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+    @Test
+    public void testMultipleTransactionsOutside60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            previousTransactions.add(new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(61), "BR"));
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+    @Test
+    public void testMixedTransactionsWithinAndOutside60Minutes() {
+        ArrayList<FraudDetectionSystem.Transaction> previousTransactions = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            previousTransactions.add(new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(59), "BR"));
+        }
+        for (int i = 0; i < 2; i++) {
+            previousTransactions.add(new FraudDetectionSystem.Transaction(5000, currentTime.minusMinutes(61), "BR"));
+        }
+
+        FraudDetectionSystem.Transaction transaction = new FraudDetectionSystem.Transaction(5000, currentTime, "BR");
+        FraudDetectionSystem.FraudCheckResult result = fraudDetectionSystem.checkForFraud(transaction, previousTransactions, List.of("HighRiskLocation"));
+
+        Assertions.assertFalse(result.isBlocked);
+    }
+
+
 }

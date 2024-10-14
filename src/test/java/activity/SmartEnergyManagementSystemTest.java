@@ -233,4 +233,92 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Lights"));
         Assertions.assertTrue(result.deviceStatus.get("Appliances"));
     }
+
+    @Test 
+    public void testCurrentPriceWithinThreshold(){
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(0.20, 0.20, devicePriorities, currentTime, 25.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+        Assertions.assertFalse(result.energySavingMode);
+    }
+
+    @Test 
+    public void testCurrentPriceAboveThreshold(){
+         SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(0.25, 0.20, devicePriorities, currentTime, 25.0, desiredTemperatureRange, 50.0, 25.0, List.of());
+        Assertions.assertTrue(result.energySavingMode);
+    }
+
+      @Test
+    public void testCurrentTemperatureEqualsDesiredTemperatureRange0() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 20.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                10, 0, List.of());
+        
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
+        Assertions.assertFalse(result.temperatureRegulationActive);
+    }
+
+    @Test
+    public void testCurrentTemperatureLowerDesiredTemperatureRange0() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 18.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                10, 0, List.of());
+        
+        Assertions.assertTrue(result.deviceStatus.get("Heating"));
+        Assertions.assertTrue(result.deviceStatus.get("Cooling"));
+        Assertions.assertTrue(result.temperatureRegulationActive);
+    }
+
+    @Test
+    public void testCurrentTemperatureEqualsDesiredTemperatureRange1() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 24.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                10, 0, List.of());
+        
+        Assertions.assertFalse(result.deviceStatus.get("Heating"));
+        Assertions.assertFalse(result.deviceStatus.get("Cooling"));
+        Assertions.assertFalse(result.temperatureRegulationActive);
+    }
+
+    @Test
+    public void testCurrentTemperatureAboveDesiredTemperatureRange1() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 26.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                10, 0, List.of());
+        
+        Assertions.assertTrue(result.deviceStatus.get("Heating"));
+        Assertions.assertTrue(result.deviceStatus.get("Cooling"));
+        Assertions.assertTrue(result.temperatureRegulationActive);
+    }
 }

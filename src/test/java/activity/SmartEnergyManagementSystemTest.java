@@ -321,4 +321,43 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Cooling"));
         Assertions.assertTrue(result.temperatureRegulationActive);
     }
+/*
+    @Test
+    public void testEnergyUsedEqualsLimit() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 26.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        double totalEnergyUsedToday = 10;
+        double energyUsageLimit = 10;
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                energyUsageLimit, totalEnergyUsedToday, List.of());
+        
+        Assertions.assertEquals(totalEnergyUsedToday,result.totalEnergyUsed);
+        }
+    @Test
+    public void testEnergyUsedNotEqualsLimit() {
+        SmartEnergyManagementSystem system = new SmartEnergyManagementSystem();
+        double currentTemperature = 26.0;
+        double[] desiredTemperatureRange = {20.0, 24.0};
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Cooling", 1);
+        double totalEnergyUsedToday = 12;
+        double energyUsageLimit = 10;
+        
+        SmartEnergyManagementSystem.EnergyManagementResult result = system.manageEnergy(
+                0.1, 0.2, devicePriorities, LocalDateTime.now(), 
+                currentTemperature, desiredTemperatureRange, 
+                energyUsageLimit, totalEnergyUsedToday, List.of());
+        
+        Assertions.assertEquals(energyUsageLimit,result.totalEnergyUsed);
+
+}
+*/
 }

@@ -321,6 +321,25 @@ public class SmartEnergyManagementSystemTest {
         Assertions.assertTrue(result.deviceStatus.get("Cooling"));
         Assertions.assertTrue(result.temperatureRegulationActive);
     }
+
+    @Test
+    public void testEnergyLimitExactlyEqual() {
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+        devicePriorities.put("Lights", 2);
+        devicePriorities.put("Appliances", 3);
+
+        double totalEnergyUsedToday = 30.0;
+        double energyUsageLimit = 30.0;  // Exatamente igual ao limite
+
+        SmartEnergyManagementSystem.EnergyManagementResult result = energyManagementSystem.manageEnergy(
+                0.15, 0.20, devicePriorities, currentTime, 16.0, desiredTemperatureRange, energyUsageLimit, totalEnergyUsedToday, List.of());
+
+        // Esperado: os dispositivos de baixa prioridade devem ser desligados
+        Assertions.assertTrue(result.deviceStatus.get("Heating"));  // Dispositivo de alta prioridade permanece ligado
+        Assertions.assertFalse(result.deviceStatus.get("Lights"));  // Dispositivo de baixa prioridade é desligado
+        Assertions.assertFalse(result.deviceStatus.get("Appliances"));  // Dispositivo de baixa prioridade é desligado
+    }
 /*
     @Test
     public void testEnergyUsedEqualsLimit() {
